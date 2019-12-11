@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class PahocConan(ConanFile):
     name = "paho-c"
-    version = "1.3.0"
+    version = "1.3.1"
     license = "EPL-1.0"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     description = """The Eclipse Paho project provides open-source client implementations of MQTT
@@ -36,16 +36,22 @@ of Things (IoT)"""
             del self.options.fPIC
 
     def configure(self):
+        self.options["*"].shared = self.options.shared
         del self.settings.compiler.libcxx
 
     def source(self):
-        sha256 = "44f2a04549bc12781cfb92fea7b9b6155f9d16d4deca8f70795bc5981440f0ac"
+        sha256 = "96efc8b5691dc0b6b0820617113ccfffa76153b274f80d5fa4768067bf08a1b1"
         tools.get("%s/archive/v%s.zip" % (self.homepage, self.version), sha256=sha256)
         os.rename("paho.mqtt.c-%s" % self.version, self._source_subfolder)
 
     def requirements(self):
         if self.options.SSL:
-            self.requires("OpenSSL/1.0.2s@conan/stable")
+            self.requires("openssl/1.1.1d")
+
+    def package_id(self):
+        self.info.shared_library_package_id()
+        if self.options.SSL:
+            self.info.requires["openssl"].minor_mode()
 
     def _configure_cmake(self):
         cmake = CMake(self)
